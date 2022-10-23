@@ -1,0 +1,7 @@
+../Core/Src/WS2812B_Presets.c:7:6:Preset_Rainbow	48	static
+../Core/Src/WS2812B_Presets.c:24:6:Preset_Raindrop	48	static
+../Core/Src/WS2812B_Presets.c:41:6:Preset_OnOff	32	static
+../Core/Src/WS2812B_Presets.c:49:6:Preset_RandomColor	32	static
+../Core/Src/WS2812B_Presets.c:55:6:Preset_Hue	40	static
+../Core/Src/WS2812B_Presets.c:60:6:Preset_Gradient	80	static
+../Core/Src/WS2812B_Presets.c:100:6:Preset_RandomPixelOnOff	24	static

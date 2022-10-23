@@ -1,0 +1,7 @@
+../Core/Src/WS2812B_Effects.c:9:5:Effect_Loop	48	static
+../Core/Src/WS2812B_Effects.c:38:5:Effect_LoopOnlyBrightness	48	static
+../Core/Src/WS2812B_Effects.c:66:5:Effect_Rainbow	48	static
+../Core/Src/WS2812B_Effects.c:82:5:Effect_Fade	48	static
+../Core/Src/WS2812B_Effects.c:149:5:Effect_FadeDown	40	static
+../Core/Src/WS2812B_Effects.c:172:5:Effect_Train	48	static
+../Core/Src/WS2812B_Effects.c:201:5:Effect_TrainOnlyBrightness	48	static

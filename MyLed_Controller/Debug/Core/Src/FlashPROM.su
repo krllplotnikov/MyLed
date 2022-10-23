@@ -1,0 +1,4 @@
+../Core/Src/FlashPROM.c:5:6:FlashPROM_Init	16	static
+../Core/Src/FlashPROM.c:44:6:FlashPROM_Write16	32	static
+../Core/Src/FlashPROM.c:63:6:FlashPROM_Read16	24	static
+../Core/Src/FlashPROM.c:79:6:EraseFlash	16	static

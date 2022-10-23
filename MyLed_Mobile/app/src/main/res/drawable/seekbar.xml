@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- color, size, shape height of seekbar -->
+    <item android:gravity="center">
+        <shape android:shape="rectangle">
+            <gradient android:angle="270"
+                android:startColor="@color/dark_1"
+                android:endColor="@color/dark_2"
+                android:centerY="1.0"/>
+            <size android:height="12dp"
+                android:width="320dp"/>
+            <corners android:radius="6dp"/>
+        </shape>
+    </item>
+    <!-- color, size, shape height of seekbar when u drag it-->
+    <item android:gravity="center">
+        <clip>
+            <shape android:shape="rectangle">
+                <gradient android:angle="0"
+                    android:startColor="@color/orange_1"
+                    android:endColor="@color/orange_2"
+                    android:centerY="1.0"/>
+                <size android:height="4dp"
+                    android:width="312dp"/>
+                <corners android:radius="2dp"/>
+            </shape>
+        </clip>
+    </item>
+</layer-list>

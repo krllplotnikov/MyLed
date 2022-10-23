@@ -1,0 +1,11 @@
+DFT.c:5:6:create	32	static
+DFT.c:12:6:sum	32	static
+DFT.c:19:6:dif	32	static
+DFT.c:26:6:mul	40	static
+DFT.c:33:6:div	32	static
+DFT.c:40:7:module	24	static
+DFT.c:46:6:dft_init_32	64	static
+DFT.c:54:6:dft_init_256	64	static
+DFT.c:62:6:dft_32_and_mgnitude	584	static
+DFT.c:78:6:dft_256_and_mgnitude	4168	static
+DFT.c:94:6:fdft_256_and_mgnitude	4200	static

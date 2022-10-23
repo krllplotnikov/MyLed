@@ -1,0 +1,3 @@
+../Core/Src/FFT.c:15:7:sine	24	static
+../Core/Src/FFT.c:28:7:cosine	24	static
+../Core/Src/FFT.c:41:6:FFT	200	static
