@@ -5,6 +5,7 @@
 - Используемая периферия микроконтроллера
 - Принцип работы
 - Возможности контроллера
+- Фото и видео демонстрации
 ____
 ## Описание
 Данный проект представляет из себя контроллер и мобильное приложение для беспроводного управления адресной светодиодной лентой на микросхеме WS2812B. Главным управляющим органом является микроконтроллер STMF103C8T6. Упрваление осуществляется при помощи WI-FI сети (через точку доступа контроллера или через локальную сеть роутера).
@@ -37,3 +38,31 @@ ____
     - изменение скорости анимации цветомузыки
     - изменение чувствительности 3-х уровней частот звука
 ____
+## Фото и видео демонстрации
+### Эффекты
+#### Rainbow Loop
+![e_rainbowLoop](./raw/videos/e_rainbowLoop.mp4)
+#### Flip Flop
+![e_flipflop](./raw/videos/e_flipflop.mp4)
+#### Fade
+![e_fade](./raw/videos/e_fade.mp4)
+#### Rainbow
+![e_rainbow](./raw/videos/e_rainbow.mp4)
+### Цветомузыка
+#### Sectors
+![cm_sectors](./raw/videos/cm_sectors.mp4)
+#### Running Leds
+![cm_runningLeds](./raw/videos/cm_runningLeds.mp4)
+#### Flashing
+![cm_flashing](./raw/videos/cm_flashing.mp4)
+### Макетка
+![contoller](./raw/photos/contoller.jpg)
+### Скриншоты мобильного приложения
+![1_dark](./raw/screenshots/1_dark.jpg)
+![2_dark](./raw/screenshots/2_dark.jpg)
+![3_dark](./raw/screenshots/3_dark.jpg)
+![4_dark](./raw/screenshots/4_dark.jpg)
+![1_light](./raw/screenshots/1_light.jpg)
+![2_light](./raw/screenshots/2_light.jpg)
+![3_light](./raw/screenshots/3_light.jpg)
+![4_light](./raw/screenshots/4_light.jpg)
