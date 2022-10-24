@@ -41,28 +41,29 @@ ____
 ## Фото и видео демонстрации
 ### Эффекты
 #### Rainbow Loop
-![e_rainbowLoop](./raw/videos/e_rainbowLoop.mp4)
+![e_rainbowLoop](./raw/videos/e_rainbowLoop.gif)
 #### Flip Flop
-![e_flipflop](./raw/videos/e_flipflop.mp4)
+![e_flipflop](./raw/videos/e_flipflop.gif)
 #### Fade
-![e_fade](./raw/videos/e_fade.mp4)
+![e_fade](./raw/videos/e_fade.gif)
 #### Rainbow
-![e_rainbow](./raw/videos/e_rainbow.mp4)
+![e_rainbow](./raw/videos/e_rainbow.gif)
 ### Цветомузыка
 #### Sectors
-![cm_sectors](./raw/videos/cm_sectors.mp4)
+![cm_sectors](./raw/videos/cm_sectors.gif)
 #### Running Leds
-![cm_runningLeds](./raw/videos/cm_runningLeds.mp4)
+![cm_runningLeds](./raw/videos/cm_runningLeds.gif)
 #### Flashing
-![cm_flashing](./raw/videos/cm_flashing.mp4)
+![cm_flashing](./raw/videos/cm_flashing.gif)
 ### Макетка
-![contoller](./raw/photos/contoller.jpg)
+<img src="./raw/photos/contoller.jpg" width="300" height="225"/>
+
 ### Скриншоты мобильного приложения
-![1_dark](./raw/screenshots/1_dark.jpg)
-![2_dark](./raw/screenshots/2_dark.jpg)
-![3_dark](./raw/screenshots/3_dark.jpg)
-![4_dark](./raw/screenshots/4_dark.jpg)
-![1_light](./raw/screenshots/1_light.jpg)
-![2_light](./raw/screenshots/2_light.jpg)
-![3_light](./raw/screenshots/3_light.jpg)
-![4_light](./raw/screenshots/4_light.jpg)
+<img src="./raw/screenshots/1_dark.jpg" width="300" height="600"/>
+<img src="./raw/screenshots/2_dark.jpg" width="300" height="600"/>
+<img src="./raw/screenshots/3_dark.jpg" width="300" height="600"/>
+<img src="./raw/screenshots/4_dark.jpg" width="300" height="600"/>
+<img src="./raw/screenshots/1_light.jpg" width="300" height="600"/>
+<img src="./raw/screenshots/2_light.jpg" width="300" height="600"/>
+<img src="./raw/screenshots/3_light.jpg" width="300" height="600"/>
+<img src="./raw/screenshots/4_light.jpg" width="300" height="600"/>
