@@ -1,0 +1,4 @@
+../Core/Src/WS2812B_Effects.c:8:6:WS2812B_MakeEffect	4
+../Core/Src/WS2812B_Effects.c:21:6:Effect_RainbowLoop	3
+../Core/Src/WS2812B_Effects.c:31:6:Effect_Fade	3
+../Core/Src/WS2812B_Effects.c:39:6:Effect_Police	3

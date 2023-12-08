@@ -1,18 +1,23 @@
 #ifndef INC_WS2812B_EFFECTS_H_
 #define INC_WS2812B_EFFECTS_H_
 
-#include "WS2812B.h"
-#include "WS2812B_Presets.h"
-#include <stdlib.h>
+#include <WS2812B.h>
 
-#define END_CYCLE (-1)
+typedef enum {
+	EFFECT_NONE,
+	EFFECT_RAINBOWLOOP,
+	EFFECT_FLIPFLOP,
+	EFFECT_FADE,
+	EFFECT_RAINBOW,
+	EFFECT_RAINBOWFADE,
+	EFFECT_RANDOMCOLORFADE,
+	EFFECT_POLICE
+} Effects;
 
-int Effect_Loop(WS2812B_t* layer, uint16_t begin, uint16_t end, uint8_t mirrored, uint16_t delay, uint8_t n_effect);
-int Effect_LoopOnlyBrightness(WS2812B_t* layer, uint16_t begin, uint16_t end, uint8_t mirrored, uint16_t delay, uint8_t n_effect);
-int Effect_Rainbow(WS2812B_t* layer, uint16_t begin, uint16_t end, uint8_t mirrored, uint16_t delay, uint8_t n_effect);
-int Effect_Fade(WS2812B_t* layer, uint16_t begin, uint16_t end, uint8_t mirrored, uint16_t delay, uint8_t n_effect);
-int Effect_FadeDown(WS2812B_t* layer, uint16_t begin, uint16_t end, uint8_t mirrored, uint16_t delay, uint8_t n_effect);
-int Effect_Train(WS2812B_t* layer, uint16_t begin, uint16_t end, uint8_t mirrored, uint16_t delay, uint8_t n_effect);
-int Effect_TrainOnlyBrightness(WS2812B_t* layer, uint16_t begin, uint16_t end, uint8_t mirrored, uint16_t delay, uint8_t n_effect);
+void WS2812B_MakeEffect(WS2812B_t *strip, Effects effect, uint16_t delay);
+
+void Effect_RainbowLoop(WS2812B_t *strip, uint16_t delay);
+void Effect_Fade(WS2812B_t *strip, uint16_t delay);
+void Effect_Police(WS2812B_t *strip, uint16_t delay);
 
 #endif

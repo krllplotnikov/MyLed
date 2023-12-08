@@ -22,15 +22,20 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "ESP.h"
-#include "WS2812B_CustomEffects.h"
+#include "ESP_AT.h"
+#include "WS2812B.h"
+#include "WS2812B_Effects.h"
 #include "FlashPROM.h"
 #include <stdio.h>
 #include <stdlib.h>
-extern WS2812B_t leds[];
+
+#define RX_BUFF_SIZE 33
+#define MAX_LEDS 240
+#define FIRST_WRITE_KEY 13
 #define SETTINGS_BUFFSIZE (sizeof(Settings))
 #define AUTOSAVE_PERIOD 10000
 unsigned long autosaveTimer = 0;
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,158 +93,42 @@ enum Commands{
     SET_NUM_LEDS,
     SET_WIFI_SETTENGS,
 	SET_AP_SETTINGS,
-	ON_OFF
+	SET_ON_OFF
 };
 
+//---------Settings-----------
 typedef struct{
+	uint8_t firstWriteKey;
 	uint8_t brightness;
-	uint8_t color_r;
-	uint8_t color_g;
-	uint8_t color_b;
+	uint8_t colorR;
+	uint8_t colorG;
+	uint8_t colorB;
 	uint8_t effect;
-	uint8_t effect_delay;
-	uint8_t color_music;
-	uint8_t color_music_delay;
-	uint8_t color_music_low_sensivity;
-	uint8_t color_music_medium_sensivity;
-	uint8_t color_music_high_sensivity;
-	uint8_t num_leds;
-	uint8_t ssid[16];
-	uint8_t pass[16];
+	uint8_t effectDelay;
+	uint8_t colorMusic;
+	uint8_t colorMusicDelay;
+	uint8_t colorMusicLowSensivity;
+	uint8_t colorMusicMediumSensivity;
+	uint8_t colorMusicHighSensivity;
+	uint8_t numleds;
+	uint8_t ssidSTA[16];
+	uint8_t passSTA[16];
 	uint8_t ssidAP[16];
 	uint8_t passAP[16];
-	uint8_t on_off;
+	uint8_t onOff;
 }Settings;
 Settings settings = {0};
-uint16_t settings_buff[SETTINGS_BUFFSIZE] = {0};
 
-void saveData(){
-	for(int i = 0; i < SETTINGS_BUFFSIZE; i++)
-		settings_buff[i] = *((uint8_t*)(&settings) + i);
-	FlashPROM_Write16(settings_buff);
-}
+WS2812B_t myled;
+uint8_t rxBuff[RX_BUFF_SIZE] = {};
+uint8_t dataReceivedFlag = 0;
 
-void IPD_callback(char* esp_message_IDP){
-	uint8_t rx_data[33] = {0};
-	uint16_t data_length = 0;
-	char tmp[4] = {0};
-	int j = 0;
-	int i = 0;
-	while(esp_message_IDP[i] != ',')
-		i++;
-	i++;
-	while(esp_message_IDP[i] != ',')
-		i++;
-	i++;
-	for(; esp_message_IDP[i] != ':'; i++){
-		tmp[j] = esp_message_IDP[i];
-		j++;
+void ESP_IPD_Callback(uint8_t id, uint16_t len, char* data){
+	if(!dataReceivedFlag){
+		memcpy(rxBuff, data, len);
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		dataReceivedFlag = 1;
 	}
-	data_length = atoi(tmp);
-	j++;
-	i++;
-	for(int k = 0; k < data_length; k++)
-		rx_data[k] = esp_message_IDP[i + k];
-
-	switch (rx_data[0])
-	{
-	case SET_BRIGHTNESS:
-	{
-		settings.brightness = rx_data[1];
-		WS2812B_SetBrightness(settings.brightness);
-		break;
-	}
-	case SET_COLOR:
-	{
-		settings.color_r = rx_data[1];
-		settings.color_g = rx_data[2];
-		settings.color_b = rx_data[3];
-		for(int i = 0; i < settings.num_leds; i++)
-			WS2812B_SetPixelRGB(leds, settings.color_r, settings.color_g, settings.color_b, i);
-		break;
-	}
-	case SET_EFFECT:
-	{
-		settings.color_music = NOCOLORMUSIC;
-		settings.effect = rx_data[1];
-		break;
-	}
-	case SET_EFFECT_DELAY:
-	{
-		settings.effect_delay = rx_data[1];
-		WS2812B_SetEffectDelay(settings.effect_delay);
-		break;
-	}
-	case SET_COLOR_MUSIC:
-	{
-		settings.effect = NOEFFECT;
-		settings.color_music = rx_data[1];
-		break;
-	}
-	case SET_COLOR_MUSIC_DELAY:
-	{
-		settings.color_music_delay = rx_data[1];
-		WS2812B_SetColorMusicDelay(settings.color_music_delay);
-		break;
-	}
-	case SET_COLOR_MUSIC_SENSIVITY:
-	{
-		settings.color_music_low_sensivity = rx_data[1];
-		settings.color_music_medium_sensivity = rx_data[2];
-		settings.color_music_high_sensivity = rx_data[3];
-		WS2812B_SetMaxAmplitudeL(settings.color_music_low_sensivity);
-		WS2812B_SetMaxAmplitudeM(settings.color_music_medium_sensivity);
-		WS2812B_SetMaxAmplitudeH(settings.color_music_high_sensivity);
-		break;
-	}
-	case SET_NUM_LEDS:
-	{
-		if(rx_data[1] <= MAX_NUM_LEDS){
-			settings.num_leds = rx_data[1];
-			WS2812B_SetNumLeds(settings.num_leds);
-		}
-		break;
-	}
-	case SET_WIFI_SETTENGS:
-	{
-		for(int i = 1; i < sizeof(settings.ssid); i++)
-			settings.ssid[i - 1] = rx_data[i];
-		for(int i = 1; i < sizeof(settings.pass); i++)
-			settings.pass[i - 1] = rx_data[i + sizeof(settings.ssid)];
-
-		saveData();
-		HAL_Delay(5);
-		__set_FAULTMASK(1);
-		NVIC_SystemReset();
-		break;
-	}
-	case SET_AP_SETTINGS:
-	{
-		for(int i = 1; i < sizeof(settings.ssid); i++)
-			settings.ssidAP[i - 1] = rx_data[i];
-		for(int i = 1; i < sizeof(settings.pass); i++)
-			settings.passAP[i - 1] = rx_data[i + sizeof(settings.ssid)];
-
-		saveData();
-		HAL_Delay(5);
-		__set_FAULTMASK(1);
-		NVIC_SystemReset();
-		break;
-	}
-	case ON_OFF:
-	{
-		settings.on_off = !settings.on_off;
-		if(!settings.on_off){
-			for(int i = 0; i < settings.num_leds; i++)
-				WS2812B_SetPixelRGB(leds, 0, 0, 0, i);
-			while(WS2812B_Show() != SHOW_OK);
-			saveData();
-			HAL_Delay(5);
-		}
-		break;
-	}
-	}
-	autosaveTimer = HAL_GetTick();
 }
 /* USER CODE END 0 */
 
@@ -283,84 +172,168 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   HAL_Delay(100);
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
   FlashPROM_Init(SETTINGS_BUFFSIZE);
-  FlashPROM_Read16(settings_buff);
-  if(settings_buff[0] == 0xFFFF){
+  FlashPROM_Read((void*)&settings);
+  if(settings.firstWriteKey != FIRST_WRITE_KEY){
+	  settings.firstWriteKey = FIRST_WRITE_KEY;
 	  settings.brightness = 32;
-	  settings.num_leds = 60;
-	  settings.effect_delay = 50;
-	  settings.color_r = 255;
-	  settings.color_g = 0;
-	  settings.color_b = 0;
+	  settings.numleds = 60;
+	  settings.effectDelay = 50;
+	  settings.colorR = 255;
+	  settings.colorG = 0;
+	  settings.colorB = 0;
 	  settings.effect = 0;
-	  settings.effect_delay = 50;
-	  settings.color_music = 0;
-	  settings.color_music_delay = 50;
-	  settings.color_music_low_sensivity = 35;
-	  settings.color_music_medium_sensivity = 35;
-	  settings.color_music_high_sensivity = 35;
-	  sprintf((char*)settings.ssid, "none");
-	  sprintf((char*)settings.pass, "none");
+	  settings.effectDelay = 50;
+	  settings.colorMusic = 0;
+	  settings.colorMusicDelay = 50;
+	  settings.colorMusicLowSensivity = 35;
+	  settings.colorMusicMediumSensivity = 35;
+	  settings.colorMusicHighSensivity = 35;
+	  sprintf((char*)settings.ssidSTA, "none");
+	  sprintf((char*)settings.passSTA, "none");
 	  sprintf((char*)settings.ssidAP, "MyLed");
 	  sprintf((char*)settings.passAP, "myled1305");
-	  settings.on_off = 1;
-	  for(int i = 0; i < SETTINGS_BUFFSIZE; i++)
-		  settings_buff[i] = *((uint8_t*)(&settings) + i);
-	  FlashPROM_Write16(settings_buff);
-  }
-  else{
-	  for(int i = 0; i < SETTINGS_BUFFSIZE; i++)
-		  *((uint8_t*)(&settings) + i) = settings_buff[i];
+	  settings.onOff = 1;
+	  FlashPROM_Write((void*)&settings);
   }
 
-  ESP_AT_Init();
-  AT_Execute();
-  ATE0_Execute();
-  AT__CWMODE_CUR_Set(1);
-  AT__CIPSTA_CUR_Set("192.168.0.113", "192.168.0.1", "255.255.255.0");
-  if(AT__CWJAP_CUR_Set((char*)settings.ssid, (char*)settings.pass) != AT_OK)
+  ESP_Init(&huart1);
+  ESP_STA_Mode();
+  ESP_STA_IP("192.168.0.113", "192.168.0.1", "255.255.255.0");
+  if(!ESP_ConnectToAP((char*)settings.ssidSTA, (char*)settings.passSTA))
   {
-	  AT__CWMODE_CUR_Set(2);
-	  AT__CWSAP_CUR_Set((char*)settings.ssidAP, (char*)settings.passAP, 1, 2);
-	  AT__CIPAP_CUR_Set("192.168.0.113", "192.168.0.1", "255.255.255.0");
+	  ESP_AP_Mode();
+	  ESP_AP_Config((char*)settings.ssidAP, (char*)settings.passAP, 1, 2);
+	  ESP_AP_IP("192.168.0.113", "192.168.0.1", "255.255.255.0");
   }
-  AT__CIPMUX_Set(1);
-  AT__CIPSERVER_Set(1, 1305);
+  ESP_StartTCPServer(1305);
+  ESP_EnableCallbacs();
 
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
-  WS2812B_Init(settings.num_leds, settings.brightness);
-  WS2812B_SetEffectDelay(settings.effect_delay);
-  WS2812B_SetColorMusicDelay(settings.color_music_delay);
-  WS2812B_SetMaxAmplitudeL(settings.color_music_low_sensivity);
-  WS2812B_SetMaxAmplitudeM(settings.color_music_medium_sensivity);
-  WS2812B_SetMaxAmplitudeH(settings.color_music_high_sensivity);
-  WS2812B_SetBrightness(settings.brightness);
-  WS2812B_SetNumLeds(settings.num_leds);
-  WS2812B_SetDelay(5);
-  WS2812B_CM_Init();
+  WS2812B_Init(&myled, MAX_LEDS, &htim1, TIM_CHANNEL_1);
+  WS2812B_SetBrightness(&myled, settings.brightness);
+  WS2812B_SetNumLeds(&myled, settings.numleds);
 
-  for(int i = 0; i < settings.num_leds; i++)
-	  WS2812B_SetPixelRGB(leds, settings.color_r, settings.color_g, settings.color_b, i);
+  memset(rxBuff, 0, RX_BUFF_SIZE);
+
   while (1)
   {
-	  ESP_CheckMessage();
-	  if(settings.on_off){
-		  if(!settings.effect && !settings.color_music)
-			  for(int i = 0; i < settings.num_leds; i++){
-				  WS2812B_SetPixelRGB(leds, settings.color_r, settings.color_g, settings.color_b, i);
-				  WS2812B_SetPixelBrightness(leds, settings.brightness, i);
-			  }
-		  WS2812B_MakeEffect(settings.effect);
-		  WS2812B_MakeColorMusic(settings.color_music);
-		  WS2812B_Show();
+		if(settings.onOff){
+			WS2812B_MakeEffect(&myled, settings.effect, settings.effectDelay);
 
-		  if(autosaveTimer > 0){
-			  if(HAL_GetTick() - autosaveTimer > AUTOSAVE_PERIOD){
-				  saveData();
-				  autosaveTimer = 0;
-			  }
-		  }
+			if(!settings.effect){
+				for(size_t i = 0; i < MAX_LEDS; i++){
+					WS2812B_SetPixelRGB(&myled, settings.colorR, settings.colorG, settings.colorB, i);
+				}
+			}
+			WS2812B_Show(&myled);
+		}else{
+			WS2812B_Off(&myled);
+		}
+		if(HAL_GetTick() - autosaveTimer > AUTOSAVE_PERIOD && autosaveTimer != 0){
+			FlashPROM_Write((void*)&settings);
+			autosaveTimer = 0;
+		}
+
+	  if(dataReceivedFlag){
+		  switch (rxBuff[0])
+		  	{
+		  	case SET_BRIGHTNESS:
+		  	{
+		  		settings.brightness = rxBuff[1];
+		  		WS2812B_SetBrightness(&myled, settings.brightness);
+		  		break;
+		  	}
+		  	case SET_COLOR:
+		  	{
+		  		settings.colorR = rxBuff[1];
+		  		settings.colorG = rxBuff[2];
+		  		settings.colorB = rxBuff[3];
+		  		for(int i = 0; i < settings.numleds; i++)
+		  			WS2812B_SetPixelRGB(&myled, settings.colorR, settings.colorG, settings.colorB, i);
+		  		break;
+		  	}
+		  	case SET_EFFECT:
+		  	{
+		  		settings.effect = rxBuff[1];
+		  		break;
+		  	}
+		  	case SET_EFFECT_DELAY:
+		  	{
+		  		settings.effectDelay = rxBuff[1];
+		  		break;
+		  	}
+		  	case SET_COLOR_MUSIC:
+		  	{
+		  		settings.colorMusic = rxBuff[1];
+		  		break;
+		  	}
+		  	case SET_COLOR_MUSIC_DELAY:
+		  	{
+		  		settings.colorMusicDelay = rxBuff[1];
+		  		break;
+		  	}
+		  	case SET_COLOR_MUSIC_SENSIVITY:
+		  	{
+		  		settings.colorMusicLowSensivity = rxBuff[1];
+		  		settings.colorMusicMediumSensivity = rxBuff[2];
+		  		settings.colorMusicHighSensivity = rxBuff[3];
+		  		break;
+		  	}
+		  	case SET_NUM_LEDS:
+		  	{
+		  		if(rxBuff[1] <= MAX_LEDS){
+		  			settings.numleds = rxBuff[1];
+		  			WS2812B_SetNumLeds(&myled, settings.numleds);
+		  		}
+		  		break;
+		  	}
+		  	case SET_WIFI_SETTENGS:
+		  	{
+		  		for(int i = 1; i < sizeof(settings.ssidSTA); i++)
+		  			settings.ssidSTA[i - 1] = rxBuff[i];
+		  		for(int i = 1; i < sizeof(settings.passSTA); i++)
+		  			settings.passSTA[i - 1] = rxBuff[i + sizeof(settings.ssidSTA)];
+
+		  		FlashPROM_Write((void*)&settings);
+		  		HAL_Delay(5);
+		  		__set_FAULTMASK(1);
+		  		NVIC_SystemReset();
+		  		break;
+		  	}
+		  	case SET_AP_SETTINGS:
+		  	{
+		  		for(int i = 1; i < sizeof(settings.ssidAP); i++)
+		  			settings.ssidAP[i - 1] = rxBuff[i];
+		  		for(int i = 1; i < sizeof(settings.passAP); i++)
+		  			settings.passAP[i - 1] = rxBuff[i + sizeof(settings.ssidAP)];
+
+		  		FlashPROM_Write((void*)&settings);
+		  		HAL_Delay(5);
+		  		__set_FAULTMASK(1);
+		  		NVIC_SystemReset();
+		  		break;
+		  	}
+		  	case SET_ON_OFF:
+		  	{
+		  		settings.onOff = !settings.onOff;
+		  		if(!settings.onOff){
+		  			for(int i = 0; i < settings.numleds; i++)
+		  				WS2812B_SetPixelRGB(&myled, 0, 0, 0, i);
+		  			WS2812B_MakeEffect(&myled, EFFECT_NONE, settings.effectDelay);
+		  			WS2812B_Show(&myled);
+		  			FlashPROM_Write((void*)&settings);
+		  			HAL_Delay(5);
+		  		}
+		  		break;
+		  	}
+		  	}
+		  	memset(rxBuff, 0, RX_BUFF_SIZE);
+		  	autosaveTimer = HAL_GetTick();
+		  	dataReceivedFlag = 0;
 	  }
     /* USER CODE END WHILE */
 
@@ -631,11 +604,27 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
